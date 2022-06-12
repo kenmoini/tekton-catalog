@@ -34,6 +34,7 @@ spec:
   workspaces:
     - name: artifacts
       description: The folder where we write the container tar artifact to
+      mountPath: /tmp/artifacts
 
   steps:
     - image: $(params.BUILDER_IMAGE)
@@ -50,8 +51,6 @@ spec:
         - mountPath: /var/lib/containers
           name: varlibcontainers
 
-        - name: artifacts
-          mountPath: /tmp/artifacts
         #- mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
         #  name: config-trusted-cabundle
         #  readOnly: true

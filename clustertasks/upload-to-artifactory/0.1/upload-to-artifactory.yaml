@@ -43,6 +43,7 @@ spec:
   workspaces:
     - name: artifacts
       description: The folder where we retrieve the artifacts to upload
+      mountPath: /tmp/artifacts
 
   steps:
     - image: $(params.TASK_IMAGE)
@@ -52,9 +53,7 @@ spec:
         cd $(workspaces.artifacts.path)
         ls -al
         curl -u $(params.ARTIFACTORY_USERNAME):$(params.ARTIFACTORY_PASSWORD) -X PUT $(params.ARTIFACTORY_URL)/$(params.ARTIFACT_PATH) -T $(params.UPLOAD_FILE_PATH)
-      volumeMounts:
-        - name: artifacts
-          mountPath: /tmp/artifacts
+      #volumeMounts:
         #- mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
         #  name: config-trusted-cabundle
         #  readOnly: true
