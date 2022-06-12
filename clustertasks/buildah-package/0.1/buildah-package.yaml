@@ -1,0 +1,69 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: buildah-package
+  labels:
+    app.kubernetes.io/version: "0.1"
+    operator.tekton.dev/provider-type: Ken Moini
+  annotations:
+    tekton.dev/categories: Image Build
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: image-build,buildah-package,buildah-package-0.1,artifact
+    tekton.dev/platforms: "linux/amd64"
+spec:
+  description: >-
+    buildah-package task pulls, mounts, and compresses a container image to a tar image.
+
+  params:
+    - description: Reference of the image buildah will produce.
+      name: SOURCE_IMAGE
+      type: string
+      default: "quay.io/kenmoini/podman-desktop-wsl2-ubi9:latest"
+
+    - description: Name of the tar file to save to the artifacts workspace.
+      name: ARTIFACT_NAME
+      type: string
+      default: "container.tar"
+
+    - default: >-
+        registry.redhat.io/rhel8/buildah@sha256:23fb7971ea6ac4aaaaa1139473a602df0df19222a3b5a76b551b2b9ddd92e927
+      description: The location of the buildah builder image.
+      name: BUILDER_IMAGE
+      type: string
+
+  workspaces:
+    - name: artifacts
+      description: The folder where we write the container tar artifact to
+      mountPath: /tmp/artifacts
+
+  steps:
+    - image: $(params.BUILDER_IMAGE)
+      name: build
+      resources: {}
+      script: |
+        CONTNR=$(buildah from $(params.SOURCE_IMAGE))
+        echo "CONTNR: $CONTNR"
+        MNTPNT=$(buildah mount $CONTNR)
+        echo "MNTPNT: $MNTPNT"
+        cd $MNTPNT
+        tar -cvf /tmp/artifacts/$(params.ARTIFACT_NAME) .
+      volumeMounts:
+        - mountPath: /var/lib/containers
+          name: varlibcontainers
+
+        - name: artifacts
+          mountPath: /tmp/artifacts
+        #- mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+        #  name: config-trusted-cabundle
+        #  readOnly: true
+      securityContext: 
+        runAsUser: 0
+        privileged: true
+    
+  volumes:
+    - emptyDir: {}
+      name: varlibcontainers
+
+    #- name: config-trusted-cabundle
+    #  configMap:
+    #    name: config-trusted-cabundle
