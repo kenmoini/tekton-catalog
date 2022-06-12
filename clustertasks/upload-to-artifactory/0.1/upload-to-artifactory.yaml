@@ -49,6 +49,8 @@ spec:
       name: upload
       resources: {}
       script: |
+        cd $(workspaces.artifacts.path)
+        ls -al
         curl -u $(params.ARTIFACTORY_USERNAME):$(params.ARTIFACTORY_PASSWORD) -X PUT $(params.ARTIFACTORY_URL)/$(params.ARTIFACT_PATH) -T $(params.UPLOAD_FILE_PATH)
       volumeMounts:
         - name: artifacts
