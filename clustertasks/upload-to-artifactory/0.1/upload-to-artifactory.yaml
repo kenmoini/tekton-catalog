@@ -27,13 +27,13 @@ spec:
       name: ARTIFACT_PATH
       type: string
 
-    - description: The username to use when authenticating with the JFrog Artifactory server
-      name: ARTIFACTORY_USERNAME
-      type: string
+    #- description: The username to use when authenticating with the JFrog Artifactory server
+    #  name: ARTIFACTORY_USERNAME
+    #  type: string
 
-    - description: The password to use when authenticating with the JFrog Artifactory server
-      name: ARTIFACTORY_PASSWORD
-      type: string
+    #- description: The password to use when authenticating with the JFrog Artifactory server
+    #  name: ARTIFACTORY_PASSWORD
+    #  type: string
 
     - name: TASK_IMAGE
       type: string
@@ -45,6 +45,10 @@ spec:
       description: The folder where we retrieve the artifacts to upload
       mountPath: /tmp/artifacts
 
+    - name: artifactory-credentials-secret
+      description: The folder where we mount the JFrog Artifactory credentials secret
+      mountPath: /var/run/secrets/artifactory-credentials-secret
+
   steps:
     - image: $(params.TASK_IMAGE)
       name: upload
@@ -52,12 +56,16 @@ spec:
       script: |
         cd $(workspaces.artifacts.path)
         ls -al
-        curl -u $(params.ARTIFACTORY_USERNAME):$(params.ARTIFACTORY_PASSWORD) -X PUT $(params.ARTIFACTORY_URL)/$(params.ARTIFACT_PATH) -T $(params.UPLOAD_FILE_PATH)
+        ls -al /var/run/secrets/artifactory-credentials-secret
+        cat /var/run/secrets/artifactory-credentials-secret/*
+        USERNAME=$(cat /var/run/secrets/artifactory-credentials-secret/username)
+        PASSWORD=$(cat /var/run/secrets/artifactory-credentials-secret/password)
+        curl -u $USERNAME:$PASSWORD -X PUT $(params.ARTIFACTORY_URL)/$(params.ARTIFACT_PATH) -T $(params.UPLOAD_FILE_PATH)
       #volumeMounts:
         #- mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
         #  name: config-trusted-cabundle
         #  readOnly: true
-    
+
   #volumes:
 
     #- name: config-trusted-cabundle
