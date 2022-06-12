@@ -1,0 +1,64 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: upload-to-artifactory
+  labels:
+    app.kubernetes.io/version: "0.1"
+    operator.tekton.dev/provider-type: community
+  annotations:
+    tekton.dev/categories: Artifact Upload
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: artifact-upload,artifactory,jfrog
+    tekton.dev/platforms: "linux/amd64"
+spec:
+  description: >-
+    upload-to-artifactory task uploads a file to an artifactory repository.
+
+  params:
+    - description: Path to the file to upload from the workspace
+      name: UPLOAD_FILE_PATH
+      type: string
+
+    - description: JFrog Artifactory URL
+      name: ARTIFACTORY_URL
+      type: string
+
+    - description: The path to the artifact that will be created on the JFrog Artifactory server
+      name: ARTIFACT_PATH
+      type: string
+
+    - description: The username to use when authenticating with the JFrog Artifactory server
+      name: ARTIFACTORY_USERNAME
+      type: string
+
+    - description: The password to use when authenticating with the JFrog Artifactory server
+      name: ARTIFACTORY_PASSWORD
+      type: string
+
+    - name: TASK_IMAGE
+      type: string
+      default: "registry.access.redhat.com/ubi8/ubi-minimal:8.6-751"
+      description: The location of the task image to use.
+
+  workspaces:
+    - name: artifacts
+      description: The folder where we retrieve the artifacts to upload
+
+  steps:
+    - image: $(params.TASK_IMAGE)
+      name: upload
+      resources: {}
+      script: |
+        curl -u $(params.ARTIFACTORY_USERNAME):$(params.ARTIFACTORY_PASSWORD) -X PUT $(params.ARTIFACTORY_URL)/$(params.ARTIFACT_PATH) -T $(params.UPLOAD_FILE_PATH)
+      volumeMounts:
+        - name: artifacts
+          mountPath: /tmp/artifacts
+        #- mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+        #  name: config-trusted-cabundle
+        #  readOnly: true
+    
+  #volumes:
+
+    #- name: config-trusted-cabundle
+    #  configMap:
+    #    name: config-trusted-cabundle
