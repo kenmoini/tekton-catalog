@@ -27,14 +27,6 @@ spec:
       name: ARTIFACT_PATH
       type: string
 
-    #- description: The username to use when authenticating with the JFrog Artifactory server
-    #  name: ARTIFACTORY_USERNAME
-    #  type: string
-
-    #- description: The password to use when authenticating with the JFrog Artifactory server
-    #  name: ARTIFACTORY_PASSWORD
-    #  type: string
-
     - name: TASK_IMAGE
       type: string
       default: "registry.access.redhat.com/ubi8/ubi-minimal:8.6-751"
@@ -55,9 +47,6 @@ spec:
       resources: {}
       script: |
         cd $(workspaces.artifacts.path)
-        ls -al
-        ls -al /var/run/secrets/artifactory-credentials-secret
-        cat /var/run/secrets/artifactory-credentials-secret/*
         USERNAME=$(cat /var/run/secrets/artifactory-credentials-secret/username)
         PASSWORD=$(cat /var/run/secrets/artifactory-credentials-secret/password)
         curl -u $USERNAME:$PASSWORD -X PUT $(params.ARTIFACTORY_URL)/$(params.ARTIFACT_PATH) -T $(params.UPLOAD_FILE_PATH)
