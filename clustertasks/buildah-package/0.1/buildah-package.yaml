@@ -34,7 +34,6 @@ spec:
   workspaces:
     - name: artifacts
       description: The folder where we write the container tar artifact to
-      mountPath: /tmp/artifacts
 
   steps:
     - image: $(params.BUILDER_IMAGE)
