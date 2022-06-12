@@ -3,7 +3,6 @@ kind: AppProject
 metadata:
   creationTimestamp: null
   name: tekton-catalog
-  namespace: tekton-catalog
 spec:
   clusterResourceWhitelist:
     - group: '*'

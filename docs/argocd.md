@@ -3,7 +3,7 @@
 In the `argocd` directory you can find a number of resources to deploy these resources in this Tekton Catalog to a Kubernetes/OpenShift cluster.
 
 ```bash
-oc apply -f argocd/
+oc apply -n openshift-gitops -f argocd/
 ```
 
 This will create a `tekton-catalog` Namespace, a `tekton-catalog` scoped set of ArgoCD resources, which will start to sync to the local cluster.

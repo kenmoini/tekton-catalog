@@ -3,7 +3,6 @@ kind: Application
 metadata:
   creationTimestamp: null
   name: tekton-cluster-tasks
-  namespace: tekton-catalog
 spec:
   destination:
     server: 'https://kubernetes.default.svc'
@@ -11,7 +10,7 @@ spec:
     repoURL: 'https://github.com/kenmoini/tekton-catalog.git'
     targetRevision: HEAD
     ## Path is the repo directory that containers the cluster(s) configuration and deployment manifests
-    path: /clustertasks/
+    path: clustertasks/
     ## Enable recursive sub-directory search to enable management of multiple cluster from this single Application
     directory:
       recurse: true
