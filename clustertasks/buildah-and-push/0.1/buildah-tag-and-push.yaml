@@ -118,7 +118,7 @@ spec:
           -f $(params.DOCKERFILE) -t $(params.IMAGE):local $(params.CONTEXT)
 
         # Image Checksum Tags
-        SHA_SUM=$(buildah images --digests | grep '$(params.IMAGE)' | tr -s '[:space:]' ' ' | cut -d ' ' -f 3)
+        SHA_SUM=$(buildah --storage-driver=$(params.STORAGE_DRIVER) images --digests | grep '$(params.IMAGE)' | tr -s '[:space:]' ' ' | cut -d ' ' -f 3)
         LONG_SHA="$(echo $SHA_SUM | sed -e 's/sha256://g')"
         SHORT_SHA=${LONG_SHA:0:12}
         echo "LONG_SHA: $LONG_SHA"
@@ -143,7 +143,7 @@ spec:
             fi
           fi
 
-          buildah tag \
+          buildah --storage-driver=$(params.STORAGE_DRIVER) tag \
           $(params.IMAGE):local $(params.IMAGE):${tag}
 
           buildah --storage-driver=$(params.STORAGE_DRIVER) push \
