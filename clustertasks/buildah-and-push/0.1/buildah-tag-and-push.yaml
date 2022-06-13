@@ -3,12 +3,12 @@ kind: ClusterTask
 metadata:
   annotations:
     tekton.dev/pipelines.minVersion: 0.12.1
-    tekton.dev/tags: image-build,buildah-and-push,buildah-and-push-0.1
+    tekton.dev/tags: image-build,buildah-tag-and-push,buildah-tag-and-push-0.1
     tekton.dev/platforms: "linux/amd64"
   labels:
     app.kubernetes.io/version: '0.1'
     operator.tekton.dev/provider-type: community
-  name: buildah-and-push
+  name: buildah-tag-and-push
 spec:
   description: >-
     Buildah task builds source into a container image and then pushes it to a
@@ -23,6 +23,11 @@ spec:
     - description: Reference of the image buildah will produce.
       name: IMAGE
       type: string
+
+    - description: String of tags to tag and push, comma delimited
+      name: IMAGE_TAGS
+      type: string
+      default: latest
 
     - default: >-
         registry.redhat.io/rhel8/buildah@sha256:23fb7971ea6ac4aaaaa1139473a602df0df19222a3b5a76b551b2b9ddd92e927
@@ -84,9 +89,27 @@ spec:
         - mountPath: /var/lib/containers
           name: varlibcontainers
 
-        #- mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-        #  name: config-trusted-cabundle
-        #  readOnly: true
+        - mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+          name: config-trusted-cabundle
+          readOnly: true
+      securityContext: 
+        runAsUser: 0
+        privileged: true
+      workingDir: $(workspaces.source.path)
+
+    - name: tag
+      image: $(params.BUILDER_IMAGE)
+      resources: {}
+      script: |
+        tagArrayStr="$(params.IMAGE_TAGS)""
+        for i in ${tagArrayStr//,/ }
+        do
+          buildah tag \
+          $(params.IMAGE) ${i}
+        done
+      volumeMounts:
+        - mountPath: /var/lib/containers
+          name: varlibcontainers
       securityContext: 
         runAsUser: 0
         privileged: true
@@ -104,9 +127,9 @@ spec:
         - mountPath: /var/lib/containers
           name: varlibcontainers
 
-        #- mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-        #  name: config-trusted-cabundle
-        #  readOnly: true
+        - mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+          name: config-trusted-cabundle
+          readOnly: true
       securityContext: 
         runAsUser: 0
         privileged: true
@@ -123,9 +146,9 @@ spec:
     - emptyDir: {}
       name: varlibcontainers
 
-    #- name: config-trusted-cabundle
-    #  configMap:
-    #    name: config-trusted-cabundle
+    - name: config-trusted-cabundle
+      configMap:
+        name: config-trusted-cabundle
 
   workspaces:
     - name: source
