@@ -190,7 +190,7 @@ spec:
 
           buildah --storage-driver=$(params.STORAGE_DRIVER) push \
             $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
-            --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE):${tag} \
+            --digestfile $(workspaces.source.path)/image-digest-${tag} $(params.IMAGE):${tag} \
             docker://$(params.IMAGE):${tag}
         done
       volumeMounts:
@@ -205,8 +205,13 @@ spec:
       name: digest-to-results
       resources: {}
       script: >-
-        cat $(workspaces.source.path)/image-digest | tee
+        NAMES=$(echo $(ls $(workspaces.source.path)/image-digest-*))
+        namesArr=($(echo $NAMES))
+
+        cat $(workspaces.source.path)/${namesArr[1]} | tee
         /tekton/results/IMAGE_DIGEST
+
+        cat /tekton/results/IMAGE_DIGEST
 
   volumes:
     - emptyDir: {}
