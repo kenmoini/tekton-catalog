@@ -1,15 +1,15 @@
 apiVersion: tekton.dev/v1beta1
 kind: ClusterTask
 metadata:
-  name: buildah-package
-  labels:
-    app.kubernetes.io/version: "0.1"
-    operator.tekton.dev/provider-type: community
   annotations:
     tekton.dev/categories: Image Build
     tekton.dev/pipelines.minVersion: "0.12.1"
     tekton.dev/tags: image-build,buildah-package,buildah-package-0.1,artifact
     tekton.dev/platforms: "linux/amd64"
+  labels:
+    app.kubernetes.io/version: "0.1"
+    operator.tekton.dev/provider-type: community
+  name: buildah-package
 spec:
   description: >-
     buildah-package task pulls, mounts, and compresses a container image to a tar image.
