@@ -51,8 +51,16 @@ spec:
       env:
         - name: PARAM_VERBOSE
           value: $(params.verbose)
+
+        - name: PARAM_EVENTLISTENER_NAME
+          value: $(params.EVENTLISTENER_NAME)
+
+        - name: PARAM_EVENTLISTENER_NAMESPACE
+          value: $(params.EVENTLISTENER_NAMESPACE)
+
         - name: PARAM_EVENTLISTENER_ENDPOINT
           value: $(params.EVENTLISTENER_ENDPOINT)
+
       script: |
         #!/usr/bin/env sh
 
@@ -62,15 +70,13 @@ spec:
           set -x
         fi
 
-        # Get the EventListener's .status.address.url
-        oc project $EVENTLISTENER_NAMESPACE
-
-        EE_SVC_URL=$(oc get eventlistener $EVENTLISTENER_NAME -o jsonpath='{.status.address.url}')
-        EE_ROUTE_URL=$(oc get routes -l 'eventlistener=event-listener-9wzd9p' -o jsonpath='{.items[0].status.ingress[0].host}')
+        oc project $PARAM_EVENTLISTENER_NAMESPACE
 
         # cURL the EventListener with the intended payload
         if [ "${PARAM_EVENTLISTENER_ENDPOINT}" = "service" ] ; then
+          EE_SVC_URL=$(oc get eventlistener $PARAM_EVENTLISTENER_NAME -o jsonpath='{.status.address.url}')
           curl -X POST -H "Content-Type: application/json" -d '{}' $EE_SVC_URL
         else
+          EE_ROUTE_URL=$(oc get routes -l 'eventlistener=${PARAM_EVENTLISTENER_NAME}' -o jsonpath='{.items[0].status.ingress[0].host}')
           curl -X POST -H "Content-Type: application/json" -d '{}' $EE_ROUTE_URL
         fi
