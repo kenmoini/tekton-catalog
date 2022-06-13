@@ -9,19 +9,29 @@ metadata:
   labels:
     app.kubernetes.io/version: "0.1"
     operator.tekton.dev/provider-type: community
-  name: trigger-pipeline-run
+  name: trigger-pipelinerun
 spec:
   description: >-
-    trigger-pipeline-run task triggers another PipelineRun
+    trigger-pipelinerun task triggers another PipelineRun
 
   params:
     - description: The name of the EventListener to trigger
       name: EVENTLISTENER_NAME
       type: string
 
+    - name: EVENTLISTENER_NAMESPACE
+      type: string
+      default: "tekton-pipelines"
+      description: The namespace of the EventListener to trigger
+
+    - name: EVENTLISTENER_ENDPOINT
+      type: string
+      default: "service"
+      description: The endpoint type of the EventListener to trigger, service or route
+
     - name: TASK_IMAGE
       type: string
-      default: "registry.access.redhat.com/ubi8/ubi-minimal:8.6-751"
+      default: "image-registry.openshift-image-registry.svc:5000/openshift/cli:latest"
       description: The location of the task image to use.
 
     - default: 'true'
@@ -36,11 +46,13 @@ spec:
 
   steps:
     - image: $(params.TASK_IMAGE)
-      name: upload
+      name: trigger-pipelinerun
       resources: {}
       env:
         - name: PARAM_VERBOSE
           value: $(params.verbose)
+        - name: PARAM_EVENTLISTENER_ENDPOINT
+          value: $(params.EVENTLISTENER_ENDPOINT)
       script: |
         #!/usr/bin/env sh
 
@@ -51,5 +63,14 @@ spec:
         fi
 
         # Get the EventListener's .status.address.url
+        oc project $EVENTLISTENER_NAMESPACE
+
+        EE_SVC_URL=$(oc get eventlistener $EVENTLISTENER_NAME -o jsonpath='{.status.address.url}')
+        EE_ROUTE_URL=$(oc get routes -l 'eventlistener=event-listener-9wzd9p' -o jsonpath='{.items[0].status.ingress[0].host}')
+
         # cURL the EventListener with the intended payload
-        #curl -X POST -H "Content-Type: application/json" ${PARAM_EVENTLISTENER_NAME}
+        if [ "${PARAM_EVENTLISTENER_ENDPOINT}" = "service" ] ; then
+          curl -X POST -H "Content-Type: application/json" -d '{}' $EE_SVC_URL
+        else
+          curl -X POST -H "Content-Type: application/json" -d '{}' $EE_ROUTE_URL
+        fi
