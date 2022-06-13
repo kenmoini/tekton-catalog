@@ -92,7 +92,7 @@ spec:
         - mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
           name: config-trusted-cabundle
           readOnly: true
-      securityContext: 
+      securityContext:
         runAsUser: 0
         privileged: true
       workingDir: $(workspaces.source.path)
@@ -101,16 +101,39 @@ spec:
       image: $(params.BUILDER_IMAGE)
       resources: {}
       script: |
-        tagArrayStr="$(params.IMAGE_TAGS)""
+        # Git Checksum Tags
+        GIT_LONG_SUM=$(cat /tekton/results/commit)
+        GIT_SHORT_SHA=${GIT_LONG_SUM:0:12}
+
+        # Image Checksum Tags
+        SHA_SUM=$(buildah images --digests | grep '$(params.IMAGE)' | tr -s '[:space:]' ' ' | cut -d ' ' -f 3)
+        LONG_SHA="$(echo $SHA_SUM | sed -e 's/sha256://g')"
+        SHORT_SHA=${LONG_SHA:0:12}
+
+        tagArrayStr="$(params.IMAGE_TAGS)"
         for i in ${tagArrayStr//,/ }
         do
+          tag="$i"
+          if [ "$tag" == "_SHORT_SHA" ]; then
+            tag="$SHORT_SHA"
+          fi
+          if [ "$tag" == "_LONG_SHA" ]; then
+            tag="$LONG_SHA"
+          fi
+          if [ "$tag" == "_GIT_SHORT_SHA" ]; then
+            tag="$GIT_SHORT_SHA"
+          fi
+          if [ "$tag" == "_GIT_LONG_SHA" ]; then
+            tag="$GIT_LONG_SUM"
+          fi
+
           buildah tag \
           $(params.IMAGE) ${i}
         done
       volumeMounts:
         - mountPath: /var/lib/containers
           name: varlibcontainers
-      securityContext: 
+      securityContext:
         runAsUser: 0
         privileged: true
       workingDir: $(workspaces.source.path)
@@ -119,10 +142,37 @@ spec:
       name: push
       resources: {}
       script: |
-        buildah --storage-driver=$(params.STORAGE_DRIVER) push \
-          $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
-          --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE) \
-          docker://$(params.IMAGE)
+        # Git Checksum Tags
+        GIT_LONG_SUM=$(cat /tekton/results/commit)
+        GIT_SHORT_SHA=${GIT_LONG_SUM:0:12}
+
+        # Image Checksum Tags
+        SHA_SUM=$(buildah images --digests | grep '$(params.IMAGE)' | tr -s '[:space:]' ' ' | cut -d ' ' -f 3)
+        LONG_SHA="$(echo $SHA_SUM | sed -e 's/sha256://g')"
+        SHORT_SHA=${LONG_SHA:0:12}
+
+        tagArrayStr="$(params.IMAGE_TAGS)"
+        for i in ${tagArrayStr//,/ }
+        do
+          tag="$i"
+          if [ "$tag" == "_SHORT_SHA" ]; then
+            tag="$SHORT_SHA"
+          fi
+          if [ "$tag" == "_LONG_SHA" ]; then
+            tag="$LONG_SHA"
+          fi
+          if [ "$tag" == "_GIT_SHORT_SHA" ]; then
+            tag="$GIT_SHORT_SHA"
+          fi
+          if [ "$tag" == "_GIT_LONG_SHA" ]; then
+            tag="$GIT_LONG_SUM"
+          fi
+
+          buildah --storage-driver=$(params.STORAGE_DRIVER) push \
+            $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
+            --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE) \
+            docker://$(params.IMAGE)
+        done
       volumeMounts:
         - mountPath: /var/lib/containers
           name: varlibcontainers
@@ -130,7 +180,7 @@ spec:
         - mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
           name: config-trusted-cabundle
           readOnly: true
-      securityContext: 
+      securityContext:
         runAsUser: 0
         privileged: true
       workingDir: $(workspaces.source.path)
