@@ -126,7 +126,7 @@ spec:
           fi
 
           buildah tag \
-          $(params.IMAGE) ${i}
+          $(params.IMAGE) $(params.IMAGE):${tag}
         done
       volumeMounts:
         - mountPath: /var/lib/containers
@@ -168,8 +168,8 @@ spec:
 
           buildah --storage-driver=$(params.STORAGE_DRIVER) push \
             $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
-            --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE) \
-            docker://$(params.IMAGE)
+            --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE):${tag} \
+            docker://$(params.IMAGE):${tag}
         done
       volumeMounts:
         - mountPath: /var/lib/containers
