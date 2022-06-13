@@ -96,6 +96,8 @@ spec:
         if [ "${PARAM_VERBOSE}" = "true" ] ; then
           set -x
         fi
+
+        cd $(workspaces.source.path)
         
         # Git Checksum Tags
         if [ -f "/tekton/results/commit" ]; then

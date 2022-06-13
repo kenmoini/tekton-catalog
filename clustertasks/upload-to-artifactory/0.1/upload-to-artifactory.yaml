@@ -69,4 +69,9 @@ spec:
         cd $(workspaces.artifacts.path)
         USERNAME=$(cat /var/run/secrets/artifactory-credentials-secret/username)
         PASSWORD=$(cat /var/run/secrets/artifactory-credentials-secret/password)
-        curl -u $USERNAME:$PASSWORD -X PUT $(params.ARTIFACTORY_URL)/$(params.ARTIFACT_PATH) -T $(params.UPLOAD_FILE_PATH)
+        
+        UPLOAD_REQ=$(curl -u $USERNAME:$PASSWORD -X PUT $(params.ARTIFACTORY_URL)/$(params.ARTIFACT_PATH) -T $(params.UPLOAD_FILE_PATH))
+
+        echo "$UPLOAD_REQ" > /tekton/results/upload-to-artifactory.json
+
+        cat /tekton/results/upload-to-artifactory.json
