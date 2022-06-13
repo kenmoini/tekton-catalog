@@ -50,13 +50,3 @@ spec:
         USERNAME=$(cat /var/run/secrets/artifactory-credentials-secret/username)
         PASSWORD=$(cat /var/run/secrets/artifactory-credentials-secret/password)
         curl -u $USERNAME:$PASSWORD -X PUT $(params.ARTIFACTORY_URL)/$(params.ARTIFACT_PATH) -T $(params.UPLOAD_FILE_PATH)
-      volumeMounts:
-        - mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-          name: config-trusted-cabundle
-          readOnly: true
-
-  volumes:
-
-    - name: config-trusted-cabundle
-      configMap:
-        name: config-trusted-cabundle

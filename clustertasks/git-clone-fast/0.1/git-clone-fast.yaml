@@ -144,10 +144,6 @@ spec:
       image: $(params.gitInitImage)
       name: clone
       resources: {}
-      volumeMounts:
-        - mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-          name: config-trusted-cabundle
-          readOnly: true
       script: >
         #!/usr/bin/env sh
 
@@ -206,6 +202,8 @@ spec:
         test -z "${PARAM_NO_PROXY}" || export NO_PROXY="${PARAM_NO_PROXY}"
 
 
+        /ko-app/git-init --help
+
         /ko-app/git-init \
           -url="${PARAM_URL}" \
           -revision="${PARAM_REVISION}" \
@@ -246,8 +244,3 @@ spec:
         Secret to this Workspace over other volume types.
       name: basic-auth
       optional: true
-
-  volumes:
-    - name: config-trusted-cabundle
-      configMap:
-        name: config-trusted-cabundle
