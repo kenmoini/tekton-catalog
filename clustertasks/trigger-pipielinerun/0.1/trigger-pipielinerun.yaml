@@ -1,0 +1,60 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  annotations:
+    tekton.dev/categories: Artifact Upload
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: artifact-upload,artifactory,jfrog
+    tekton.dev/platforms: "linux/amd64"
+  labels:
+    app.kubernetes.io/version: "0.1"
+    operator.tekton.dev/provider-type: community
+  name: trigger-pipeline-run
+spec:
+  description: >-
+    trigger-pipeline-run task triggers another PipelineRun
+
+  params:
+    - description: The name of the EventListener to trigger
+      name: EVENTLISTENER_NAME
+      type: string
+
+    - name: SECRET_KEY
+      type: string
+      default: "secret-key"
+      description: The secret key to allow syncronization 
+
+    - name: TASK_IMAGE
+      type: string
+      default: "registry.access.redhat.com/ubi8/ubi-minimal:8.6-751"
+      description: The location of the task image to use.
+
+    - default: 'true'
+      description: Log the commands that are executed during `git-clone`'s operation.
+      name: verbose
+      type: string
+
+  workspaces:
+    - description: The path to shared result output files
+      name: results
+      mountPath: /tekton/results
+
+  steps:
+    - image: $(params.TASK_IMAGE)
+      name: upload
+      resources: {}
+      env:
+        - name: PARAM_VERBOSE
+          value: $(params.verbose)
+      script: |
+        #!/usr/bin/env sh
+
+        set -eu
+
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+          set -x
+        fi
+
+        # Get the EventListener's .status.address.url
+        # cURL the EventListener with the intended payload
+        #curl -X POST -H "Content-Type: application/json" ${PARAM_EVENTLISTENER_NAME}

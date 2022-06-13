@@ -157,8 +157,7 @@ spec:
         NAMES=$(echo $(ls $(workspaces.source.path)/image-digest-*))
         namesArr=($(echo $NAMES))
 
-        cat ${namesArr[1]} | tee
-        /tekton/results/IMAGE_DIGEST
+        cp ${namesArr[1]} /tekton/results/IMAGE_DIGEST
 
         cat /tekton/results/IMAGE_DIGEST
 
