@@ -102,13 +102,19 @@ spec:
         # Git Checksum Tags
         GIT_LONG_SUM=$(cat /tekton/results/commit)
         GIT_SHORT_SHA=${GIT_LONG_SUM:0:12}
+        echo "GIT_LONG_SUM: $GIT_LONG_SUM"
+        echo "GIT_SHORT_SHA: $GIT_SHORT_SHA"
 
         # Image Checksum Tags
         SHA_SUM=$(buildah images --digests | grep '$(params.IMAGE)' | tr -s '[:space:]' ' ' | cut -d ' ' -f 3)
         LONG_SHA="$(echo $SHA_SUM | sed -e 's/sha256://g')"
         SHORT_SHA=${LONG_SHA:0:12}
+        echo "LONG_SHA: $LONG_SHA"
+        echo "SHORT_SHA: $SHORT_SHA"
 
         tagArrayStr="$(params.IMAGE_TAGS)"
+        echo "tagArrayStr: $tagArrayStr"
+        
         for i in ${tagArrayStr//,/ }
         do
           tag="$i"
