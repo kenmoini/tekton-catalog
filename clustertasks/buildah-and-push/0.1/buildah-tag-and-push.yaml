@@ -96,12 +96,7 @@ spec:
         if [ "${PARAM_VERBOSE}" = "true" ] ; then
           set -x
         fi
-
-        buildah --storage-driver=$(params.STORAGE_DRIVER) bud \
-          $(params.BUILD_EXTRA_ARGS) --format=$(params.FORMAT) \
-          --tls-verify=$(params.TLSVERIFY) --no-cache \
-          -f $(params.DOCKERFILE) -t $(params.IMAGE):local $(params.CONTEXT)
-
+        
         # Git Checksum Tags
         if [ -f "/tekton/results/commit" ]; then
           echo "Found commit file"
@@ -111,6 +106,15 @@ spec:
           echo "GIT_SHORT_SHA: $GIT_SHORT_SHA"
         fi
 
+        tagArrayStr="$(params.IMAGE_TAGS)"
+        echo "tagArrayStr: $tagArrayStr"
+
+        # Build the local image
+        buildah --storage-driver=$(params.STORAGE_DRIVER) bud \
+          $(params.BUILD_EXTRA_ARGS) --format=$(params.FORMAT) \
+          --tls-verify=$(params.TLSVERIFY) --no-cache \
+          -f $(params.DOCKERFILE) -t $(params.IMAGE):local $(params.CONTEXT)
+
         # Image Checksum Tags
         SHA_SUM=$(buildah images --digests | grep '$(params.IMAGE)' | tr -s '[:space:]' ' ' | cut -d ' ' -f 3)
         LONG_SHA="$(echo $SHA_SUM | sed -e 's/sha256://g')"
@@ -118,9 +122,7 @@ spec:
         echo "LONG_SHA: $LONG_SHA"
         echo "SHORT_SHA: $SHORT_SHA"
 
-        tagArrayStr="$(params.IMAGE_TAGS)"
-        echo "tagArrayStr: $tagArrayStr"
-
+        # Tag and push per image tag
         for i in ${tagArrayStr//,/ }
         do
           tag="$i"
