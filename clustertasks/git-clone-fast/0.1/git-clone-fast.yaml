@@ -10,7 +10,7 @@ metadata:
   labels:
     app.kubernetes.io/version: '0.1'
     operator.tekton.dev/provider-type: community
-  name: git-clone
+  name: git-clone-fast
 spec:
   description: >-
     These Tasks are Git tasks to work with repositories used by other tasks in
