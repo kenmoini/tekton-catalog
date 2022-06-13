@@ -159,6 +159,10 @@ spec:
 
         cp ${namesArr[1]} /tekton/results/IMAGE_DIGEST
 
+        echo "Image Digest: $(cat /tekton/results/IMAGE_DIGEST)"
+
+        echo "$(params.IMAGE)" > /tekton/results/IMAGE
+
         cat /tekton/results/IMAGE_DIGEST
 
       volumeMounts:
