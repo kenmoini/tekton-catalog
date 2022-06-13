@@ -1,0 +1,11 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: ClusterTriggerBinding
+metadata:
+  name: pipelinerun
+spec:
+  params:
+    #- name: eventlistener-name
+    #  value: $(body.eventlistener)
+
+    - name: content-type
+      value: $(header.Content-Type)
