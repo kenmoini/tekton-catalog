@@ -108,10 +108,13 @@ spec:
         #!/usr/bin/env sh
 
         # Git Checksum Tags
-        GIT_LONG_SUM=$(cat /tekton/results/commit)
-        GIT_SHORT_SHA=${GIT_LONG_SUM:0:12}
-        echo "GIT_LONG_SUM: $GIT_LONG_SUM"
-        echo "GIT_SHORT_SHA: $GIT_SHORT_SHA"
+        if [ -f "/tekton/results/commit" ]; then
+          echo "Found commit file"
+          GIT_LONG_SUM=$(cat /tekton/results/commit)
+          GIT_SHORT_SHA=${GIT_LONG_SUM:0:12}
+          echo "GIT_LONG_SUM: $GIT_LONG_SUM"
+          echo "GIT_SHORT_SHA: $GIT_SHORT_SHA"
+        fi
 
         # Image Checksum Tags
         SHA_SUM=$(buildah images --digests | grep '$(params.IMAGE)' | tr -s '[:space:]' ' ' | cut -d ' ' -f 3)
@@ -132,11 +135,13 @@ spec:
           if [ "$tag" == "_LONG_SHA" ]; then
             tag="$LONG_SHA"
           fi
-          if [ "$tag" == "_GIT_SHORT_SHA" ]; then
-            tag="$GIT_SHORT_SHA"
-          fi
-          if [ "$tag" == "_GIT_LONG_SHA" ]; then
-            tag="$GIT_LONG_SUM"
+          if [ -f "/tekton/results/commit" ]; then
+            if [ "$tag" == "_GIT_SHORT_SHA" ]; then
+              tag="$GIT_SHORT_SHA"
+            fi
+            if [ "$tag" == "_GIT_LONG_SHA" ]; then
+              tag="$GIT_LONG_SUM"
+            fi
           fi
 
           buildah tag \
