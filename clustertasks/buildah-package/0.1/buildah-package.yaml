@@ -32,6 +32,10 @@ spec:
       type: string
 
   workspaces:
+    - description: The path to shared result output files
+      name: results
+      mountPath: /tekton/results
+
     - name: artifacts
       description: The folder where we write the container tar artifact to
       mountPath: /tmp/artifacts
@@ -41,6 +45,14 @@ spec:
       name: build
       resources: {}
       script: |
+        #!/usr/bin/env sh
+
+        set -eu
+
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+          set -x
+        fi
+
         CONTNR=$(buildah from $(params.SOURCE_IMAGE))
         echo "CONTNR: $CONTNR"
         MNTPNT=$(buildah mount $CONTNR)

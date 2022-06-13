@@ -24,7 +24,7 @@ spec:
       name: IMAGE
       type: string
 
-    - description: String of tags to tag and push, comma delimited
+    - description: String of tags to tag and push, comma delimited.  Available variables include _SHORT_SHA, _LONG_SHA, _GIT_SHORT_SHA, _GIT_LONG_SHA
       name: IMAGE_TAGS
       type: string
       default: latest
@@ -72,6 +72,11 @@ spec:
       name: PUSH_EXTRA_ARGS
       type: string
 
+    - default: 'true'
+      description: Log the commands that are executed during `git-clone`'s operation.
+      name: verbose
+      type: string
+
   results:
     - description: Digest of the image just built.
       name: IMAGE_DIGEST
@@ -84,7 +89,7 @@ spec:
         buildah --storage-driver=$(params.STORAGE_DRIVER) bud \
           $(params.BUILD_EXTRA_ARGS) --format=$(params.FORMAT) \
           --tls-verify=$(params.TLSVERIFY) --no-cache \
-          -f $(params.DOCKERFILE) -t $(params.IMAGE) $(params.CONTEXT)
+          -f $(params.DOCKERFILE) -t $(params.IMAGE):local $(params.CONTEXT)
       volumeMounts:
         - mountPath: /var/lib/containers
           name: varlibcontainers
@@ -96,6 +101,9 @@ spec:
     - name: tag
       image: $(params.BUILDER_IMAGE)
       resources: {}
+      env:
+        - name: PARAM_VERBOSE
+          value: $(params.verbose)
       script: |
         #!/usr/bin/env sh
 
@@ -114,7 +122,7 @@ spec:
 
         tagArrayStr="$(params.IMAGE_TAGS)"
         echo "tagArrayStr: $tagArrayStr"
-        
+
         for i in ${tagArrayStr//,/ }
         do
           tag="$i"
@@ -132,7 +140,7 @@ spec:
           fi
 
           buildah tag \
-          $(params.IMAGE) $(params.IMAGE):${tag}
+          $(params.IMAGE):local $(params.IMAGE):${tag}
         done
       volumeMounts:
         - mountPath: /var/lib/containers
@@ -146,6 +154,14 @@ spec:
       name: push
       resources: {}
       script: |
+        #!/usr/bin/env sh
+
+        set -eu
+
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+          set -x
+        fi
+
         # Git Checksum Tags
         GIT_LONG_SUM=$(cat /tekton/results/commit)
         GIT_SHORT_SHA=${GIT_LONG_SUM:0:12}
@@ -197,4 +213,8 @@ spec:
       name: varlibcontainers
 
   workspaces:
+    - description: The path to shared result output files
+      name: results
+      mountPath: /tekton/results
+
     - name: source

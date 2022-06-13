@@ -33,6 +33,10 @@ spec:
       description: The location of the task image to use.
 
   workspaces:
+    - description: The path to shared result output files
+      name: results
+      mountPath: /tekton/results
+
     - name: artifacts
       description: The folder where we retrieve the artifacts to upload
       mountPath: /tmp/artifacts
@@ -46,6 +50,15 @@ spec:
       name: upload
       resources: {}
       script: |
+        #!/usr/bin/env sh
+
+        set -eu
+
+
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+          set -x
+        fi
+
         cd $(workspaces.artifacts.path)
         USERNAME=$(cat /var/run/secrets/artifactory-credentials-secret/username)
         PASSWORD=$(cat /var/run/secrets/artifactory-credentials-secret/password)
