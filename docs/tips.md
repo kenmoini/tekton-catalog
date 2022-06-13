@@ -6,7 +6,7 @@
 # Switch to your Project
 oc project your-project
 
-PIPELINE_PROJECTS=($(oc get pipelineruns -o=jsonpath='{.items[?(@.status.conditions[?(@.type=="Succeeded")].status=="failed")].metadata.name}'))
+PIPELINE_PROJECTS=($(oc get pipelineruns -o=jsonpath='{.items[?(@.status.conditions[].status=="False")].metadata.name}'))
 
 ## Loop through PipelineRuns
 for i in "${PIPELINE_PROJECTS[@]}"

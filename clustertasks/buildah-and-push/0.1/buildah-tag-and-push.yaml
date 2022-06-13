@@ -143,9 +143,11 @@ spec:
             fi
           fi
 
+          echo "Tagging image: $(params.IMAGE):$tag"
           buildah --storage-driver=$(params.STORAGE_DRIVER) tag \
           $(params.IMAGE):local $(params.IMAGE):${tag}
 
+          echo "Pushing image: $(params.IMAGE):$tag"
           buildah --storage-driver=$(params.STORAGE_DRIVER) push \
             $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
             --digestfile $(workspaces.source.path)/image-digest-${tag} $(params.IMAGE):${tag} \
