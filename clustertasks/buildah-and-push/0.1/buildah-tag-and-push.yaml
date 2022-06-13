@@ -101,6 +101,8 @@ spec:
       image: $(params.BUILDER_IMAGE)
       resources: {}
       script: |
+        #!/usr/bin/env sh
+        
         # Git Checksum Tags
         GIT_LONG_SUM=$(cat /tekton/results/commit)
         GIT_SHORT_SHA=${GIT_LONG_SUM:0:12}

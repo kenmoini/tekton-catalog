@@ -51,9 +51,9 @@ spec:
         - mountPath: /var/lib/containers
           name: varlibcontainers
 
-        #- mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-        #  name: config-trusted-cabundle
-        #  readOnly: true
+        - mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+          name: config-trusted-cabundle
+          readOnly: true
       securityContext: 
         runAsUser: 0
         privileged: true
@@ -62,6 +62,6 @@ spec:
     - emptyDir: {}
       name: varlibcontainers
 
-    #- name: config-trusted-cabundle
-    #  configMap:
-    #    name: config-trusted-cabundle
+    - name: config-trusted-cabundle
+      configMap:
+        name: config-trusted-cabundle
