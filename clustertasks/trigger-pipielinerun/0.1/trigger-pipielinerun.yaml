@@ -19,11 +19,6 @@ spec:
       name: EVENTLISTENER_NAME
       type: string
 
-    - name: SECRET_KEY
-      type: string
-      default: "secret-key"
-      description: The secret key to allow syncronization 
-
     - name: TASK_IMAGE
       type: string
       default: "registry.access.redhat.com/ubi8/ubi-minimal:8.6-751"
