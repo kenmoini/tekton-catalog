@@ -31,6 +31,11 @@ spec:
       name: BUILDER_IMAGE
       type: string
 
+    - default: 'true'
+      description: Log the commands that are executed during `git-clone`'s operation.
+      name: verbose
+      type: string
+
   workspaces:
     - description: The path to shared result output files
       name: results
@@ -44,6 +49,9 @@ spec:
     - image: $(params.BUILDER_IMAGE)
       name: build
       resources: {}
+      env:
+        - name: PARAM_VERBOSE
+          value: $(params.verbose)
       script: |
         #!/usr/bin/env sh
 

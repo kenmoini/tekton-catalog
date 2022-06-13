@@ -85,7 +85,18 @@ spec:
     - image: $(params.BUILDER_IMAGE)
       name: build
       resources: {}
+      env:
+        - name: PARAM_VERBOSE
+          value: $(params.verbose)
       script: |
+        #!/usr/bin/env sh
+
+        set -eu
+
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+          set -x
+        fi
+
         buildah --storage-driver=$(params.STORAGE_DRIVER) bud \
           $(params.BUILD_EXTRA_ARGS) --format=$(params.FORMAT) \
           --tls-verify=$(params.TLSVERIFY) --no-cache \
@@ -106,6 +117,12 @@ spec:
           value: $(params.verbose)
       script: |
         #!/usr/bin/env sh
+
+        set -eu
+
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+          set -x
+        fi
 
         # Git Checksum Tags
         if [ -f "/tekton/results/commit" ]; then
@@ -158,6 +175,9 @@ spec:
     - image: $(params.BUILDER_IMAGE)
       name: push
       resources: {}
+      env:
+        - name: PARAM_VERBOSE
+          value: $(params.verbose)
       script: |
         #!/usr/bin/env sh
 
@@ -209,7 +229,18 @@ spec:
     - image: $(params.BUILDER_IMAGE)
       name: digest-to-results
       resources: {}
+      env:
+        - name: PARAM_VERBOSE
+          value: $(params.verbose)
       script: >-
+        #!/usr/bin/env sh
+
+        set -eu
+
+        if [ "${PARAM_VERBOSE}" = "true" ] ; then
+          set -x
+        fi
+
         NAMES=$(echo $(ls $(workspaces.source.path)/image-digest-*))
         namesArr=($(echo $NAMES))
 

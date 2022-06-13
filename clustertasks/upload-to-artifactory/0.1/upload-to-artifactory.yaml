@@ -32,6 +32,11 @@ spec:
       default: "registry.access.redhat.com/ubi8/ubi-minimal:8.6-751"
       description: The location of the task image to use.
 
+    - default: 'true'
+      description: Log the commands that are executed during `git-clone`'s operation.
+      name: verbose
+      type: string
+
   workspaces:
     - description: The path to shared result output files
       name: results
@@ -49,11 +54,13 @@ spec:
     - image: $(params.TASK_IMAGE)
       name: upload
       resources: {}
+      env:
+        - name: PARAM_VERBOSE
+          value: $(params.verbose)
       script: |
         #!/usr/bin/env sh
 
         set -eu
-
 
         if [ "${PARAM_VERBOSE}" = "true" ] ; then
           set -x
