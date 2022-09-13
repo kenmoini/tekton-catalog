@@ -9,7 +9,7 @@ metadata:
     tekton.dev/categories: Image Build, Security
     tekton.dev/pipelines.minVersion: "0.17.0"
     tekton.dev/tags: image-build
-    tekton.dev/displayName: "Buildpacks (phases)"
+    tekton.dev/displayName: "Buildpacks (phases) (variable)"
     tekton.dev/platforms: "linux/amd64"
 spec:
   description: >-
