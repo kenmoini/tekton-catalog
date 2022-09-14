@@ -23,6 +23,9 @@ spec:
     - name: cache
       description: Directory where cache is stored (when no cache image is provided).
       optional: true
+    - name: cacerts-ws
+      description: Directory where cache is stored (when no cache image is provided).
+      optional: true
 
   params:
     - name: APP_IMAGE
